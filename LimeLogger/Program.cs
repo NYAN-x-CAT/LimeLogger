@@ -101,7 +101,7 @@ namespace LimeLogger
                     }
                 }
 
-                using (StreamWriter sw = new StreamWriter(loggerPath, false))
+                using (StreamWriter sw = new StreamWriter(loggerPath, true))
                 {
                     if (CurrentActiveWindowTitle == GetActiveWindowTitle())
                     {
