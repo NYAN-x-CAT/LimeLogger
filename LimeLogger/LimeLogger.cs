@@ -145,7 +145,7 @@ namespace LimeLogger
                 Process p = Process.GetProcessById((int)pid);
                 string title = p.MainWindowTitle;
                 if (string.IsNullOrWhiteSpace(title))
-                    title = p.MainModule.ModuleName;
+                    title = p.ProcessName;
                 CurrentActiveWindowTitle = title;
                 return title;
             }
