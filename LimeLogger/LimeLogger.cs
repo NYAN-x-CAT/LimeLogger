@@ -17,9 +17,6 @@ namespace LimeLogger
 {
    public static class LimeLogger
     {
-        [DllImport("kernel32.dll", SetLastError = true)]
-        static extern IntPtr GetCurrentProcess();
-
         private static readonly string loggerPath = Application.StartupPath + @"\log.txt";
         private static string CurrentActiveWindowTitle;
 
